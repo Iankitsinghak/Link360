@@ -59,6 +59,12 @@ const filterTabs = document.querySelectorAll('.filter-tab');
 const sortSelect = document.getElementById('sortSelect');
 const searchInput = document.getElementById('searchInput');
 
+// Form Elements
+const customShortCode = document.getElementById('customShortCode');
+const shortCodeCounter = document.getElementById('shortCodeCounter');
+const customShortCodeError = document.getElementById('customShortCodeError');
+const customShortCodeSuccess = document.getElementById('customShortCodeSuccess');
+
 // Stats Elements
 const totalLinksEl = document.getElementById('totalLinks');
 const totalClicksEl = document.getElementById('totalClicks');
@@ -242,6 +248,26 @@ function initializeEventListeners() {
     
     if (createLinkSubmit) {
         createLinkSubmit.addEventListener('click', handleCreateLink);
+    }
+    
+    // Custom short code validation
+    if (customShortCode) {
+        // Character counter
+        customShortCode.addEventListener('input', () => {
+            const value = customShortCode.value;
+            shortCodeCounter.textContent = value.length;
+            
+            // Only allow valid characters
+            customShortCode.value = value.replace(/[^a-zA-Z0-9-_]/g, '');
+            
+            // Real-time validation
+            if (value.length > 0) {
+                validateCustomShortCode(value);
+            } else {
+                customShortCodeError.style.display = 'none';
+                customShortCodeSuccess.style.display = 'none';
+            }
+        });
     }
     
     // Logout
@@ -457,11 +483,58 @@ function closeCreateLinkModal() {
 
 function clearCreateLinkForm() {
     destinationUrl.value = '';
+    customShortCode.value = '';
+    shortCodeCounter.textContent = '0';
+    customShortCodeError.style.display = 'none';
+    customShortCodeSuccess.style.display = 'none';
     utmSource.value = '';
     utmMedium.value = '';
     utmCampaign.value = '';
     utmTerm.value = '';
     utmContent.value = '';
+}
+
+// Validate custom short code availability
+let validateTimeout;
+async function validateCustomShortCode(shortCode) {
+    clearTimeout(validateTimeout);
+    
+    // Basic validation
+    if (shortCode.length < 3) {
+        customShortCodeError.textContent = 'Short code must be at least 3 characters';
+        customShortCodeError.style.display = 'block';
+        customShortCodeSuccess.style.display = 'none';
+        return false;
+    }
+    
+    if (!/^[a-zA-Z0-9-_]+$/.test(shortCode)) {
+        customShortCodeError.textContent = 'Only letters, numbers, hyphens, and underscores allowed';
+        customShortCodeError.style.display = 'block';
+        customShortCodeSuccess.style.display = 'none';
+        return false;
+    }
+    
+    // Check availability with debounce
+    validateTimeout = setTimeout(async () => {
+        try {
+            const db = firebase.firestore();
+            const doc = await db.collection('links').doc(shortCode).get();
+            
+            if (doc.exists) {
+                customShortCodeError.textContent = '✗ This short code is already taken';
+                customShortCodeError.style.display = 'block';
+                customShortCodeSuccess.style.display = 'none';
+                return false;
+            } else {
+                customShortCodeError.style.display = 'none';
+                customShortCodeSuccess.style.display = 'block';
+                return true;
+            }
+        } catch (error) {
+            console.error('Error checking availability:', error);
+            return true; // Allow if check fails
+        }
+    }, 500);
 }
 
 // ================================
@@ -482,6 +555,33 @@ async function handleCreateLink() {
     } catch (e) {
         showToast('Please enter a valid URL', 'error');
         return;
+    }
+    
+    // Get custom short code
+    const customCode = customShortCode.value.trim();
+    
+    // Validate custom short code if provided
+    if (customCode) {
+        if (customCode.length < 3) {
+            showToast('Custom short code must be at least 3 characters', 'error');
+            return;
+        }
+        if (!/^[a-zA-Z0-9-_]+$/.test(customCode)) {
+            showToast('Invalid short code format', 'error');
+            return;
+        }
+        
+        // Check if already taken
+        try {
+            const db = firebase.firestore();
+            const doc = await db.collection('links').doc(customCode).get();
+            if (doc.exists) {
+                showToast('This short code is already taken', 'error');
+                return;
+            }
+        } catch (error) {
+            console.error('Error checking short code:', error);
+        }
     }
     
     // Get UTM parameters
@@ -511,6 +611,7 @@ async function handleCreateLink() {
             },
             body: JSON.stringify({
                 url,
+                customShortCode: customCode || null,
                 utmParams: Object.keys(utmParams).length > 0 ? utmParams : null
             })
         });

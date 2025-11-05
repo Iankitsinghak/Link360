@@ -123,7 +123,7 @@ function getBaseUrl(req) {
 
 // Create short link (requires authentication)
 app.post('/api/shorten', verifyToken, async (req, res) => {
-  const { url, utmParams } = req.body;
+  const { url, utmParams, customShortCode } = req.body;
   const userId = req.user.uid;
   
   if (!url) {
@@ -137,6 +137,45 @@ app.post('/api/shorten', verifyToken, async (req, res) => {
     return res.status(400).json({ error: 'Invalid URL' });
   }
 
+  // Validate custom short code if provided
+  let shortCode;
+  if (customShortCode) {
+    const trimmedCode = customShortCode.trim();
+    
+    // Validate format
+    if (trimmedCode.length < 3) {
+      return res.status(400).json({ error: 'Custom short code must be at least 3 characters' });
+    }
+    
+    if (trimmedCode.length > 50) {
+      return res.status(400).json({ error: 'Custom short code must be less than 50 characters' });
+    }
+    
+    if (!/^[a-zA-Z0-9-_]+$/.test(trimmedCode)) {
+      return res.status(400).json({ error: 'Custom short code can only contain letters, numbers, hyphens, and underscores' });
+    }
+    
+    // Check if already exists in Firestore
+    try {
+      const existingDoc = await db.collection(COLLECTIONS.LINKS).doc(trimmedCode).get();
+      if (existingDoc.exists) {
+        return res.status(409).json({ error: 'This custom short code is already taken' });
+      }
+    } catch (error) {
+      console.error('Error checking custom short code:', error);
+    }
+    
+    // Check in-memory storage as fallback
+    if (links.has(trimmedCode)) {
+      return res.status(409).json({ error: 'This custom short code is already taken' });
+    }
+    
+    shortCode = trimmedCode;
+  } else {
+    // Generate random short code
+    shortCode = generateShortCode();
+  }
+
   // Add UTM parameters if provided
   let finalUrl = url;
   if (utmParams) {
@@ -146,7 +185,6 @@ app.post('/api/shorten', verifyToken, async (req, res) => {
     }
   }
 
-  const shortCode = generateShortCode();
   const baseUrl = getBaseUrl(req);
   const shortUrl = `${baseUrl}/${shortCode}`;
   
@@ -158,7 +196,8 @@ app.post('/api/shorten', verifyToken, async (req, res) => {
     userId,
     userEmail: req.user.email || '',
     createdAt: new Date().toISOString(),
-    utmParams: parseUTMParams(finalUrl) || utmParams || {}
+    utmParams: parseUTMParams(finalUrl) || utmParams || {},
+    isCustom: !!customShortCode
   };
 
   const analyticsData = {
@@ -181,7 +220,8 @@ app.post('/api/shorten', verifyToken, async (req, res) => {
       success: true,
       shortUrl,
       shortCode,
-      originalUrl: finalUrl
+      originalUrl: finalUrl,
+      isCustom: !!customShortCode
     });
   } catch (error) {
     console.error('Error saving to Firestore:', error);
@@ -194,7 +234,8 @@ app.post('/api/shorten', verifyToken, async (req, res) => {
       success: true,
       shortUrl,
       shortCode,
-      originalUrl: finalUrl
+      originalUrl: finalUrl,
+      isCustom: !!customShortCode
     });
   }
 });

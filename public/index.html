@@ -457,6 +457,35 @@
                     <input type="url" class="form-input" id="destinationUrl" placeholder="https://example.com">
                 </div>
                 
+                <div class="form-group">
+                    <label>
+                        Custom Short Code (Optional)
+                        <span style="color: var(--text-tertiary); font-size: 12px; font-weight: 400;">
+                            - Leave empty for auto-generated
+                        </span>
+                    </label>
+                    <div style="position: relative;">
+                        <input 
+                            type="text" 
+                            class="form-input" 
+                            id="customShortCode" 
+                            placeholder="my-custom-link"
+                            pattern="[a-zA-Z0-9-_]+"
+                            maxlength="50"
+                            style="padding-right: 80px;">
+                        <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); font-size: 12px;">
+                            <span id="shortCodeCounter">0</span>/50
+                        </span>
+                    </div>
+                    <small style="color: var(--text-tertiary); font-size: 12px; margin-top: 4px; display: block;">
+                        Only letters, numbers, hyphens, and underscores allowed
+                    </small>
+                    <div id="customShortCodeError" style="color: var(--accent-red); font-size: 12px; margin-top: 4px; display: none;"></div>
+                    <div id="customShortCodeSuccess" style="color: var(--accent-green); font-size: 12px; margin-top: 4px; display: none;">
+                        ✓ Short code is available!
+                    </div>
+                </div>
+                
                 <div class="form-section">
                     <h4>UTM Parameters (Optional)</h4>
                     <div class="form-grid">
