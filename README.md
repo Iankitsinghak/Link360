@@ -11,6 +11,14 @@
 
 **A professional-grade, open-source platform for creating trackable short links with real-time analytics and instant QR code generation just a little better than bitly.com**
 
+### Preview
+<p align="center">
+  <a href="https://github.com/xthxr/Link360">
+    <img src="assets/thumbnail.png" alt="Link360 — Analytics Dashboard preview" width="1000" />
+  </a>
+  <p align="center"><em>Analytics dashboard — live, real-time metrics</em></p>
+</p>
+
 [Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [API Reference](#-api-reference) • [Contributing](#-contributing)
 
 </div>
