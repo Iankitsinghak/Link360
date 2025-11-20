@@ -11,6 +11,13 @@
 
 **A professional-grade, open-source platform for creating trackable short links with real-time analytics and instant QR code generation just a little better than bitly.com**
 
+<p align="center">
+  <a href="https://github.com/xthxr/Link360">
+    <img src="public/assets/thumbnail.png" alt="Link360 — Hyper Analytics Platform for Links" width="1000" />
+  </a>
+  <p align="center"><em>Cool Analytics Dashboard — Live, Real-time Metrics</em></p>
+</p>
+
 [Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [API Reference](#-api-reference) • [Contributing](#-contributing)
 
 </div>
@@ -480,31 +487,11 @@ Link360 can be deployed to any Node.js hosting platform:
 
 #### Recommended Platforms
 
-1. **[Vercel](https://vercel.com)** ⭐ Recommended
+**[Vercel](https://vercel.com)** ⭐ Recommended
    - Zero-config deployment
    - Automatic HTTPS
    - Environment variable management
    - Global CDN
-
-2. **[Heroku](https://heroku.com)**
-   - Free tier available
-   - Easy Git-based deployment
-   - Add-on ecosystem
-
-3. **[Google Cloud Run](https://cloud.google.com/run)**
-   - Seamless Firebase integration
-   - Auto-scaling
-   - Pay-per-use pricing
-
-4. **[DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform)**
-   - Simple deployment
-   - Predictable pricing
-   - Managed infrastructure
-
-5. **[Railway](https://railway.app)** / **[Render](https://render.com)**
-   - Modern developer experience
-   - Automatic deployments
-   - Free tier available
 
 ### Pre-Deployment Checklist
 
