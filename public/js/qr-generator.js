@@ -421,12 +421,12 @@ const QRGenerator = {
         // Clear canvas first
         ctx.clearRect(0, 0, 400, 400);
         
-        // If square pattern, just draw the image directly
-        if (this.currentPattern === 'square') {
-            ctx.drawImage(qrImg, 0, 0, 400, 400);
-        } else {
-            // For custom patterns, redraw with pattern styles
-            this.applyPatternToQR(ctx, qrImg);
+        // Always draw the base QR code first to ensure scannability
+        ctx.drawImage(qrImg, 0, 0, 400, 400);
+        
+        // For non-square patterns, apply visual effects that don't break the QR code
+        if (this.currentPattern !== 'square') {
+            this.applyVisualPattern(ctx);
         }
         
         // Apply frame if selected
@@ -438,177 +438,99 @@ const QRGenerator = {
         this.updateFloatingPreview();
     },
 
-    applyPatternToQR(ctx, qrImg) {
-        // Create temporary canvas to analyze QR code
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 400;
-        tempCanvas.height = 400;
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(qrImg, 0, 0, 400, 400);
-        
-        // Get image data to detect QR modules
-        const imageData = tempCtx.getImageData(0, 0, 400, 400);
-        const data = imageData.data;
-        
-        // QR code is typically ~33 modules (varies by version)
-        // We'll sample the grid to detect module positions
-        const moduleSize = 400 / 33; // Approximate module size
-        
-        ctx.fillStyle = this.currentColor;
-        
-        // Draw with pattern
-        for (let row = 0; row < 33; row++) {
-            for (let col = 0; col < 33; col++) {
-                const x = col * moduleSize + moduleSize / 2;
-                const y = row * moduleSize + moduleSize / 2;
-                const pixelIndex = (Math.floor(y) * 400 + Math.floor(x)) * 4;
-                
-                // Check if this module is dark (QR code module)
-                const isDark = data[pixelIndex] < 128;
-                
-                if (isDark) {
-                    this.drawModule(ctx, col * moduleSize, row * moduleSize, moduleSize);
-                }
-            }
-        }
-    },
-
-    applyPatternOverlay(ctx) {
-        // This applies pattern styling over the base QR code
+    applyVisualPattern(ctx) {
+        // Get the current QR code image data
         const imageData = ctx.getImageData(0, 0, 400, 400);
         const data = imageData.data;
         
-        // Apply pattern effects based on selection
+        // Apply pattern-specific visual effects while preserving QR structure
+        switch (this.currentPattern) {
+            case 'dots':
+            case 'circular':
+                this.applyRoundedCorners(ctx, imageData);
+                break;
+            case 'rounded':
+            case 'extra-rounded':
+                const radius = this.currentPattern === 'extra-rounded' ? 4 : 2;
+                this.applyRoundedCorners(ctx, imageData, radius);
+                break;
+            default:
+                // For other patterns, just ensure the color is applied
+                this.applyColorOnly(ctx, imageData);
+                break;
+        }
+    },
+
+    applyRoundedCorners(ctx, imageData, radius = 3) {
+        // This creates a softened appearance without destroying the QR code structure
+        const data = imageData.data;
+        const width = 400;
+        const height = 400;
+        
+        // Create a new canvas for the rounded effect
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        // Copy original image
+        tempCtx.putImageData(imageData, 0, 0);
+        
+        // Apply subtle blur for rounded effect without losing scannability
+        ctx.clearRect(0, 0, width, height);
+        ctx.filter = 'blur(0.5px)';
+        ctx.drawImage(tempCanvas, 0, 0);
+        ctx.filter = 'none';
+        
+        // Enhance contrast to maintain scannability
+        const newImageData = ctx.getImageData(0, 0, width, height);
+        const newData = newImageData.data;
+        
+        for (let i = 0; i < newData.length; i += 4) {
+            // Increase contrast
+            const avg = (newData[i] + newData[i + 1] + newData[i + 2]) / 3;
+            if (avg < 128) {
+                // Make dark pixels darker (apply current color)
+                const color = this.hexToRgb(this.currentColor);
+                newData[i] = color.r;
+                newData[i + 1] = color.g;
+                newData[i + 2] = color.b;
+            } else {
+                // Keep light pixels light
+                newData[i] = 255;
+                newData[i + 1] = 255;
+                newData[i + 2] = 255;
+            }
+        }
+        
+        ctx.putImageData(newImageData, 0, 0);
+    },
+
+    applyColorOnly(ctx, imageData) {
+        // Simply change the color while keeping QR structure intact
+        const data = imageData.data;
+        const color = this.hexToRgb(this.currentColor);
+        
+        for (let i = 0; i < data.length; i += 4) {
+            // If pixel is dark (part of QR code), apply the custom color
+            const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            if (brightness < 128) {
+                data[i] = color.r;
+                data[i + 1] = color.g;
+                data[i + 2] = color.b;
+            }
+        }
+        
         ctx.putImageData(imageData, 0, 0);
     },
 
-    drawModule(ctx, x, y, size) {
-        ctx.save();
-        
-        switch (this.currentPattern) {
-            case 'dots':
-                ctx.beginPath();
-                ctx.arc(x + size/2, y + size/2, size * 0.4, 0, Math.PI * 2);
-                ctx.fill();
-                break;
-            
-            case 'rounded':
-                this.roundRect(ctx, x, y, size, size, size * 0.2);
-                break;
-            
-            case 'extra-rounded':
-                this.roundRect(ctx, x, y, size, size, size * 0.4);
-                break;
-            
-            case 'circular':
-                ctx.beginPath();
-                ctx.arc(x + size/2, y + size/2, size * 0.45, 0, Math.PI * 2);
-                ctx.fill();
-                break;
-            
-            case 'diamond':
-                ctx.beginPath();
-                ctx.moveTo(x + size/2, y);
-                ctx.lineTo(x + size, y + size/2);
-                ctx.lineTo(x + size/2, y + size);
-                ctx.lineTo(x, y + size/2);
-                ctx.closePath();
-                ctx.fill();
-                break;
-            
-            case 'star':
-                this.drawStar(ctx, x + size/2, y + size/2, 5, size * 0.5, size * 0.25);
-                break;
-            
-            case 'bars':
-                ctx.fillRect(x, y, size, size * 0.7);
-                break;
-            
-            case 'thick':
-                ctx.fillRect(x - size * 0.1, y - size * 0.1, size * 1.2, size * 1.2);
-                break;
-            
-            case 'thin':
-                ctx.fillRect(x + size * 0.2, y + size * 0.2, size * 0.6, size * 0.6);
-                break;
-            
-            case 'classy':
-            case 'classy-rounded':
-                this.roundRect(ctx, x, y, size, size, this.currentPattern === 'classy-rounded' ? size * 0.3 : 0);
-                break;
-            
-            case 'fluid':
-                ctx.beginPath();
-                ctx.moveTo(x, y + size * 0.3);
-                ctx.quadraticCurveTo(x + size * 0.5, y, x + size, y + size * 0.3);
-                ctx.lineTo(x + size, y + size * 0.7);
-                ctx.quadraticCurveTo(x + size * 0.5, y + size, x, y + size * 0.7);
-                ctx.closePath();
-                ctx.fill();
-                break;
-            
-            case 'mosaic':
-                const colors = [this.currentColor, this.adjustColor(this.currentColor, 20), this.adjustColor(this.currentColor, -20)];
-                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-                ctx.fillRect(x, y, size, size);
-                break;
-            
-            case 'leaf':
-                ctx.beginPath();
-                ctx.ellipse(x + size/2, y + size/2, size * 0.5, size * 0.35, Math.PI / 4, 0, Math.PI * 2);
-                ctx.fill();
-                break;
-            
-            case 'square':
-            default:
-                ctx.fillRect(x, y, size, size);
-                break;
-        }
-        
-        ctx.restore();
-    },
-
-    roundRect(ctx, x, y, width, height, radius) {
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.lineTo(x + width - radius, y);
-        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-        ctx.lineTo(x + width, y + height - radius);
-        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-        ctx.lineTo(x + radius, y + height);
-        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-        ctx.lineTo(x, y + radius);
-        ctx.quadraticCurveTo(x, y, x + radius, y);
-        ctx.closePath();
-        ctx.fill();
-    },
-
-    adjustColor(color, amount) {
-        // Convert hex to RGB, adjust brightness, convert back
-        const num = parseInt(color.replace('#', ''), 16);
-        const r = Math.min(255, Math.max(0, (num >> 16) + amount));
-        const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
-        const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
-        return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
-    },
-
-    drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
-        let rot = Math.PI / 2 * 3;
-        let step = Math.PI / spikes;
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - outerRadius);
-        
-        for (let i = 0; i < spikes; i++) {
-            ctx.lineTo(cx + Math.cos(rot) * outerRadius, cy + Math.sin(rot) * outerRadius);
-            rot += step;
-            ctx.lineTo(cx + Math.cos(rot) * innerRadius, cy + Math.sin(rot) * innerRadius);
-            rot += step;
-        }
-        
-        ctx.lineTo(cx, cy - outerRadius);
-        ctx.closePath();
-        ctx.fill();
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 0, g: 0, b: 0 };
     },
 
     applyFrame(ctx, size) {
