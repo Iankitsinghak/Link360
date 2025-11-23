@@ -216,9 +216,16 @@ function navigateToPage(page, updateHistory = true) {
     } else if (page === 'qr-generator') {
         // QR Generator page - initialized by qr-generator.js
         setTimeout(() => {
-            if (window.QRGenerator && !window.QRGenerator.initialized) {
-                window.QRGenerator.init();
-                window.QRGenerator.initialized = true;
+            if (window.QRGenerator) {
+                if (!window.QRGenerator.initialized) {
+                    console.log('Initializing QR Generator');
+                    window.QRGenerator.init();
+                    window.QRGenerator.initialized = true;
+                } else {
+                    console.log('QR Generator already initialized');
+                }
+            } else {
+                console.error('QRGenerator not found on window object');
             }
         }, 100);
     }
@@ -497,6 +504,9 @@ async function initializeAuth() {
                 const currentPath = window.location.pathname;
                 const currentPageFromUrl = currentPath.substring(1) || 'home';
                 
+                // Navigate to the current page
+                navigateToPage(currentPageFromUrl, false);
+                
                 // Load data for the current page
                 if (currentPageFromUrl === 'home') {
                     loadLinks();
@@ -504,6 +514,14 @@ async function initializeAuth() {
                     loadAnalytics();
                 } else if (currentPageFromUrl === 'profile') {
                     loadProfile();
+                } else if (currentPageFromUrl === 'qr-generator') {
+                    setTimeout(() => {
+                        if (window.QRGenerator && !window.QRGenerator.initialized) {
+                            console.log('Initializing QR Generator from auth');
+                            window.QRGenerator.init();
+                            window.QRGenerator.initialized = true;
+                        }
+                    }, 100);
                 }
             } else {
                 showLoginModal();

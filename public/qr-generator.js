@@ -32,9 +32,20 @@ const QRGenerator = {
         this.quickLinksGrid = document.getElementById('quickLinksGrid');
         this.downloadBgOptions = document.getElementById('downloadBgOptions');
         this.transparentOption = document.getElementById('transparentOption');
+        
+        console.log('QR Generator DOM cached:', {
+            qrLinkInput: !!this.qrLinkInput,
+            generateBtn: !!this.generateBtn,
+            qrCanvas: !!this.qrCanvas
+        });
     },
 
     bindEvents() {
+        if (!this.generateBtn || !this.qrLinkInput) {
+            console.error('Required elements not found');
+            return;
+        }
+        
         // Generate QR Code
         this.generateBtn.addEventListener('click', () => this.generateQR());
         this.qrLinkInput.addEventListener('keypress', (e) => {
@@ -533,23 +544,9 @@ const QRGenerator = {
 // Initialize when QR Generator page is shown
 if (typeof window !== 'undefined') {
     window.QRGenerator = QRGenerator;
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        const qrGeneratorPage = document.getElementById('qrGeneratorPage');
-        if (qrGeneratorPage) {
-            // Initialize when navigating to QR Generator page
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.attributeName === 'style') {
-                        const isVisible = qrGeneratorPage.style.display !== 'none';
-                        if (isVisible && !QRGenerator.initialized) {
-                            QRGenerator.init();
-                            QRGenerator.initialized = true;
-                        }
-                    }
-                });
-            });
-            observer.observe(qrGeneratorPage, { attributes: true });
-        }
-    });
 }
+
+// Auto-initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('QR Generator script loaded');
+});
