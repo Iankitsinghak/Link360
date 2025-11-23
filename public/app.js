@@ -215,10 +215,12 @@ function navigateToPage(page, updateHistory = true) {
         loadProfile();
     } else if (page === 'qr-generator') {
         // QR Generator page - initialized by qr-generator.js
-        if (window.QRGenerator && !window.QRGenerator.initialized) {
-            window.QRGenerator.init();
-            window.QRGenerator.initialized = true;
-        }
+        setTimeout(() => {
+            if (window.QRGenerator && !window.QRGenerator.initialized) {
+                window.QRGenerator.init();
+                window.QRGenerator.initialized = true;
+            }
+        }, 100);
     }
     
     // Close sidebar on mobile
