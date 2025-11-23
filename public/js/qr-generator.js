@@ -474,12 +474,13 @@ const QRGenerator = {
             const linksSnapshot = await firebase.firestore()
                 .collection('links')
                 .where('userId', '==', user.uid)
+                .where('active', '==', true)
                 .orderBy('createdAt', 'desc')
                 .limit(6)
                 .get();
 
             if (linksSnapshot.empty) {
-                this.quickLinksGrid.innerHTML = '<p class="text-muted">Create some links first to generate QR codes!</p>';
+                this.quickLinksGrid.innerHTML = '<p class="text-muted">Create some active links first to generate QR codes!</p>';
                 return;
             }
 
