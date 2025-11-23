@@ -3050,7 +3050,27 @@ textarea.form-input {
 /* QR Preview */
 .qr-preview-card {
     position: sticky;
-    top: 100px;
+    top: 20px;
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.qr-preview-card.compact {
+    top: 20px;
+}
+
+.qr-preview-card.compact .qr-preview-container {
+    min-height: 250px;
+    padding: 20px;
+}
+
+.qr-preview-card.compact #qrCanvas {
+    width: 200px !important;
+    height: 200px !important;
+}
+
+.qr-preview-card.compact h3 {
+    font-size: 14px;
 }
 
 .qr-preview-container {
@@ -3062,6 +3082,7 @@ textarea.form-input {
     border-radius: var(--radius-md);
     padding: 40px;
     position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .qr-canvas-wrapper {
@@ -3073,6 +3094,7 @@ textarea.form-input {
     display: block;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .qr-brand-overlay {

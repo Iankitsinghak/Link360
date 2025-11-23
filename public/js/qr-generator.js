@@ -13,6 +13,29 @@ const QRGenerator = {
         this.cacheDom();
         this.bindEvents();
         this.loadUserLinks();
+        this.initScrollBehavior();
+    },
+
+    initScrollBehavior() {
+        const qrPreviewCard = document.querySelector('.qr-preview-card');
+        if (!qrPreviewCard) return;
+
+        let scrollTimeout;
+        const handleScroll = () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Add compact class when scrolled down more than 200px
+                if (scrollTop > 200) {
+                    qrPreviewCard.classList.add('compact');
+                } else {
+                    qrPreviewCard.classList.remove('compact');
+                }
+            }, 10);
+        };
+
+        window.addEventListener('scroll', handleScroll);
     },
 
     cacheDom() {
