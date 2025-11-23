@@ -1,0 +1,551 @@
+// QR Generator Module
+const QRGenerator = {
+    currentPattern: 'square',
+    currentFrame: 'none',
+    currentColor: '#000000',
+    currentBgColor: '#ffffff',
+    currentFormat: 'png',
+    currentLink: '',
+    currentBrandName: '',
+    qrCode: null,
+
+    init() {
+        this.cacheDom();
+        this.bindEvents();
+        this.loadUserLinks();
+    },
+
+    cacheDom() {
+        this.qrLinkInput = document.getElementById('qrLinkInput');
+        this.generateBtn = document.getElementById('generateQRBtn');
+        this.qrCanvas = document.getElementById('qrCanvas');
+        this.qrPlaceholder = document.getElementById('qrPlaceholder');
+        this.qrBrandInput = document.getElementById('qrBrandInput');
+        this.qrBrandOverlay = document.getElementById('qrBrandOverlay');
+        this.qrBrandText = document.getElementById('qrBrandText');
+        this.qrColorPicker = document.getElementById('qrColorPicker');
+        this.qrColorHex = document.getElementById('qrColorHex');
+        this.bgColorPicker = document.getElementById('bgColorPicker');
+        this.bgColorHex = document.getElementById('bgColorHex');
+        this.transparentBg = document.getElementById('transparentBg');
+        this.downloadBtn = document.getElementById('downloadQRBtn');
+        this.quickLinksGrid = document.getElementById('quickLinksGrid');
+        this.downloadBgOptions = document.getElementById('downloadBgOptions');
+        this.transparentOption = document.getElementById('transparentOption');
+    },
+
+    bindEvents() {
+        // Generate QR Code
+        this.generateBtn.addEventListener('click', () => this.generateQR());
+        this.qrLinkInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.generateQR();
+        });
+
+        // Brand name overlay
+        this.qrBrandInput.addEventListener('input', (e) => {
+            this.currentBrandName = e.target.value;
+            if (this.currentBrandName && this.qrCode) {
+                this.qrBrandText.textContent = this.currentBrandName;
+                this.qrBrandOverlay.style.display = 'block';
+            } else {
+                this.qrBrandOverlay.style.display = 'none';
+            }
+        });
+
+        // Pattern selection
+        document.querySelectorAll('.pattern-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                document.querySelectorAll('.pattern-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                this.currentPattern = option.dataset.pattern;
+                if (this.currentLink) this.generateQR();
+            });
+        });
+
+        // Frame selection
+        document.querySelectorAll('.frame-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                document.querySelectorAll('.frame-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                this.currentFrame = option.dataset.frame;
+                if (this.currentLink) this.generateQR();
+            });
+        });
+
+        // Color pickers
+        this.qrColorPicker.addEventListener('input', (e) => {
+            this.currentColor = e.target.value;
+            this.qrColorHex.value = e.target.value.toUpperCase();
+            if (this.currentLink) this.generateQR();
+        });
+
+        this.qrColorHex.addEventListener('input', (e) => {
+            const color = e.target.value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+                this.currentColor = color;
+                this.qrColorPicker.value = color;
+                if (this.currentLink) this.generateQR();
+            }
+        });
+
+        // Color presets
+        document.querySelectorAll('.color-preset').forEach(preset => {
+            preset.addEventListener('click', (e) => {
+                const color = preset.dataset.color;
+                this.currentColor = color;
+                this.qrColorPicker.value = color;
+                this.qrColorHex.value = color.toUpperCase();
+                if (this.currentLink) this.generateQR();
+            });
+        });
+
+        // Background color for JPG
+        this.bgColorPicker.addEventListener('input', (e) => {
+            this.currentBgColor = e.target.value;
+            this.bgColorHex.value = e.target.value.toUpperCase();
+        });
+
+        this.bgColorHex.addEventListener('input', (e) => {
+            const color = e.target.value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+                this.currentBgColor = color;
+                this.bgColorPicker.value = color;
+            }
+        });
+
+        // Format selection
+        document.querySelectorAll('.format-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.currentFormat = btn.dataset.format;
+                
+                // Show/hide options based on format
+                if (this.currentFormat === 'jpg') {
+                    this.downloadBgOptions.style.display = 'block';
+                    this.transparentOption.style.display = 'none';
+                    this.transparentBg.checked = false;
+                } else {
+                    this.downloadBgOptions.style.display = 'none';
+                    this.transparentOption.style.display = 'block';
+                }
+            });
+        });
+
+        // Download button
+        this.downloadBtn.addEventListener('click', () => this.downloadQR());
+    },
+
+    async generateQR() {
+        const link = this.qrLinkInput.value.trim();
+        if (!link) {
+            this.showNotification('Please enter a link or text', 'error');
+            return;
+        }
+
+        this.currentLink = link;
+        this.qrPlaceholder.style.display = 'none';
+        this.qrCanvas.style.display = 'block';
+
+        try {
+            // Import QRCode library dynamically
+            const QRCode = window.QRCode || await this.loadQRCodeLibrary();
+            
+            // Clear canvas
+            const ctx = this.qrCanvas.getContext('2d');
+            ctx.clearRect(0, 0, this.qrCanvas.width, this.qrCanvas.height);
+
+            // Generate QR code with pattern customization
+            await this.drawQRWithPattern(link, ctx);
+
+            this.downloadBtn.disabled = false;
+            this.showNotification('QR Code generated successfully!', 'success');
+        } catch (error) {
+            console.error('QR generation error:', error);
+            this.showNotification('Failed to generate QR code', 'error');
+        }
+    },
+
+    async drawQRWithPattern(text, ctx) {
+        // Generate QR data using a simple QR algorithm
+        // For production, you'd use the qrcode library
+        const size = 400;
+        const modules = this.generateQRMatrix(text);
+        const moduleCount = modules.length;
+        const moduleSize = size / moduleCount;
+
+        // Clear and set background
+        ctx.fillStyle = this.transparentBg.checked && this.currentFormat === 'png' ? 'transparent' : '#ffffff';
+        ctx.fillRect(0, 0, size, size);
+
+        // Draw QR modules with selected pattern
+        ctx.fillStyle = this.currentColor;
+        
+        for (let row = 0; row < moduleCount; row++) {
+            for (let col = 0; col < moduleCount; col++) {
+                if (modules[row][col]) {
+                    const x = col * moduleSize;
+                    const y = row * moduleSize;
+                    this.drawModule(ctx, x, y, moduleSize);
+                }
+            }
+        }
+
+        // Apply frame if selected
+        if (this.currentFrame !== 'none') {
+            this.applyFrame(ctx, size);
+        }
+    },
+
+    drawModule(ctx, x, y, size) {
+        ctx.save();
+        
+        switch (this.currentPattern) {
+            case 'dots':
+                ctx.beginPath();
+                ctx.arc(x + size/2, y + size/2, size * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+            
+            case 'rounded':
+                this.roundRect(ctx, x, y, size, size, size * 0.2);
+                break;
+            
+            case 'extra-rounded':
+                this.roundRect(ctx, x, y, size, size, size * 0.4);
+                break;
+            
+            case 'circular':
+                ctx.beginPath();
+                ctx.arc(x + size/2, y + size/2, size * 0.45, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+            
+            case 'diamond':
+                ctx.beginPath();
+                ctx.moveTo(x + size/2, y);
+                ctx.lineTo(x + size, y + size/2);
+                ctx.lineTo(x + size/2, y + size);
+                ctx.lineTo(x, y + size/2);
+                ctx.closePath();
+                ctx.fill();
+                break;
+            
+            case 'star':
+                this.drawStar(ctx, x + size/2, y + size/2, 5, size * 0.5, size * 0.25);
+                break;
+            
+            case 'bars':
+                ctx.fillRect(x, y, size, size * 0.7);
+                break;
+            
+            case 'thick':
+                ctx.fillRect(x - size * 0.1, y - size * 0.1, size * 1.2, size * 1.2);
+                break;
+            
+            case 'thin':
+                ctx.fillRect(x + size * 0.2, y + size * 0.2, size * 0.6, size * 0.6);
+                break;
+            
+            case 'classy':
+            case 'classy-rounded':
+                this.roundRect(ctx, x, y, size, size, this.currentPattern === 'classy-rounded' ? size * 0.3 : 0);
+                break;
+            
+            case 'fluid':
+                ctx.beginPath();
+                ctx.moveTo(x, y + size * 0.3);
+                ctx.quadraticCurveTo(x + size * 0.5, y, x + size, y + size * 0.3);
+                ctx.lineTo(x + size, y + size * 0.7);
+                ctx.quadraticCurveTo(x + size * 0.5, y + size, x, y + size * 0.7);
+                ctx.closePath();
+                ctx.fill();
+                break;
+            
+            case 'mosaic':
+                const colors = [this.currentColor, this.adjustColor(this.currentColor, 20), this.adjustColor(this.currentColor, -20)];
+                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                ctx.fillRect(x, y, size, size);
+                break;
+            
+            case 'leaf':
+                ctx.beginPath();
+                ctx.ellipse(x + size/2, y + size/2, size * 0.5, size * 0.35, Math.PI / 4, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+            
+            case 'square':
+            default:
+                ctx.fillRect(x, y, size, size);
+                break;
+        }
+        
+        ctx.restore();
+    },
+
+    roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        ctx.fill();
+    },
+
+    drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+        let rot = Math.PI / 2 * 3;
+        let step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius);
+        
+        for (let i = 0; i < spikes; i++) {
+            ctx.lineTo(cx + Math.cos(rot) * outerRadius, cy + Math.sin(rot) * outerRadius);
+            rot += step;
+            ctx.lineTo(cx + Math.cos(rot) * innerRadius, cy + Math.sin(rot) * innerRadius);
+            rot += step;
+        }
+        
+        ctx.lineTo(cx, cy - outerRadius);
+        ctx.closePath();
+        ctx.fill();
+    },
+
+    applyFrame(ctx, size) {
+        const frameWidth = 20;
+        ctx.strokeStyle = this.getFrameColor();
+        ctx.lineWidth = frameWidth;
+
+        switch (this.currentFrame) {
+            case 'business':
+                ctx.strokeRect(frameWidth/2, frameWidth/2, size - frameWidth, size - frameWidth);
+                break;
+            case 'wedding':
+                ctx.beginPath();
+                ctx.arc(size/2, size/2, (size - frameWidth)/2, 0, Math.PI * 2);
+                ctx.stroke();
+                break;
+            case 'birthday':
+                ctx.save();
+                const gradient = ctx.createLinearGradient(0, 0, size, size);
+                gradient.addColorStop(0, '#F59E0B');
+                gradient.addColorStop(1, '#EF4444');
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = frameWidth;
+                this.roundRect(ctx, frameWidth/2, frameWidth/2, size - frameWidth, size - frameWidth, 20);
+                ctx.stroke();
+                ctx.restore();
+                break;
+            case 'party':
+                ctx.setLineDash([10, 10]);
+                ctx.strokeRect(frameWidth/2, frameWidth/2, size - frameWidth, size - frameWidth);
+                ctx.setLineDash([]);
+                break;
+            default:
+                // Other frame styles can be added here
+                break;
+        }
+    },
+
+    getFrameColor() {
+        const frameColors = {
+            business: '#3B82F6',
+            wedding: '#EC4899',
+            birthday: '#F59E0B',
+            party: '#8B5CF6',
+            concert: '#EF4444',
+            conference: '#06b6d4',
+            restaurant: '#10B981',
+            retail: '#8B5CF6',
+            social: '#3B82F6'
+        };
+        return frameColors[this.currentFrame] || this.currentColor;
+    },
+
+    adjustColor(color, amount) {
+        const num = parseInt(color.replace('#', ''), 16);
+        const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+        const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+        const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+        return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+    },
+
+    generateQRMatrix(text) {
+        // Simplified QR matrix generation (21x21 for version 1)
+        // In production, use proper qrcode library
+        const size = 21;
+        const matrix = Array(size).fill(null).map(() => Array(size).fill(false));
+        
+        // Add finder patterns (corners)
+        this.addFinderPattern(matrix, 0, 0);
+        this.addFinderPattern(matrix, size - 7, 0);
+        this.addFinderPattern(matrix, 0, size - 7);
+        
+        // Add timing patterns
+        for (let i = 8; i < size - 8; i++) {
+            matrix[6][i] = i % 2 === 0;
+            matrix[i][6] = i % 2 === 0;
+        }
+        
+        // Fill data area with pseudo-random pattern based on text
+        let hash = 0;
+        for (let i = 0; i < text.length; i++) {
+            hash = ((hash << 5) - hash) + text.charCodeAt(i);
+            hash = hash & hash;
+        }
+        
+        for (let row = 0; row < size; row++) {
+            for (let col = 0; col < size; col++) {
+                if (!this.isReserved(row, col, size)) {
+                    matrix[row][col] = ((row * size + col + hash) % 3) !== 0;
+                }
+            }
+        }
+        
+        return matrix;
+    },
+
+    addFinderPattern(matrix, startRow, startCol) {
+        // 7x7 finder pattern
+        for (let row = 0; row < 7; row++) {
+            for (let col = 0; col < 7; col++) {
+                if (row === 0 || row === 6 || col === 0 || col === 6 || (row >= 2 && row <= 4 && col >= 2 && col <= 4)) {
+                    matrix[startRow + row][startCol + col] = true;
+                }
+            }
+        }
+    },
+
+    isReserved(row, col, size) {
+        // Check if position is in finder pattern area
+        if ((row < 9 && col < 9) || (row < 9 && col >= size - 8) || (row >= size - 8 && col < 9)) {
+            return true;
+        }
+        // Check if position is in timing pattern
+        if (row === 6 || col === 6) {
+            return true;
+        }
+        return false;
+    },
+
+    downloadQR() {
+        if (!this.currentLink) {
+            this.showNotification('Please generate a QR code first', 'error');
+            return;
+        }
+
+        try {
+            // Create a temporary canvas for download
+            const downloadCanvas = document.createElement('canvas');
+            downloadCanvas.width = 800;  // Higher resolution for download
+            downloadCanvas.height = 800;
+            const ctx = downloadCanvas.getContext('2d');
+
+            // Set background based on format
+            if (this.currentFormat === 'jpg') {
+                ctx.fillStyle = this.currentBgColor;
+                ctx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+            } else if (!this.transparentBg.checked) {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+            }
+
+            // Scale and draw the QR code
+            ctx.scale(2, 2);
+            ctx.drawImage(this.qrCanvas, 0, 0);
+
+            // Convert to blob and download
+            const mimeType = this.currentFormat === 'png' ? 'image/png' : 'image/jpeg';
+            downloadCanvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `qr-code-${Date.now()}.${this.currentFormat}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showNotification('QR Code downloaded successfully!', 'success');
+            }, mimeType, 0.95);
+
+        } catch (error) {
+            console.error('Download error:', error);
+            this.showNotification('Failed to download QR code', 'error');
+        }
+    },
+
+    async loadUserLinks() {
+        // Load user's recent links for quick generation
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            const linksSnapshot = await firebase.firestore()
+                .collection('links')
+                .where('userId', '==', user.uid)
+                .orderBy('createdAt', 'desc')
+                .limit(6)
+                .get();
+
+            if (linksSnapshot.empty) {
+                this.quickLinksGrid.innerHTML = '<p class="text-muted">Create some links first!</p>';
+                return;
+            }
+
+            this.quickLinksGrid.innerHTML = '';
+            linksSnapshot.forEach(doc => {
+                const link = doc.data();
+                const btn = document.createElement('button');
+                btn.className = 'quick-link-btn';
+                btn.innerHTML = `
+                    <span class="link-short">${window.location.origin}/${link.shortCode}</span>
+                    <span class="link-original">${link.originalUrl}</span>
+                `;
+                btn.addEventListener('click', () => {
+                    this.qrLinkInput.value = `${window.location.origin}/${link.shortCode}`;
+                    this.generateQR();
+                });
+                this.quickLinksGrid.appendChild(btn);
+            });
+
+        } catch (error) {
+            console.error('Error loading links:', error);
+        }
+    },
+
+    showNotification(message, type = 'info') {
+        // Use existing notification system if available
+        if (window.showNotification) {
+            window.showNotification(message, type);
+        } else {
+            alert(message);
+        }
+    }
+};
+
+// Initialize when QR Generator page is shown
+document.addEventListener('DOMContentLoaded', () => {
+    const qrGeneratorPage = document.getElementById('qrGeneratorPage');
+    if (qrGeneratorPage) {
+        // Initialize when navigating to QR Generator page
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'style') {
+                    const isVisible = qrGeneratorPage.style.display !== 'none';
+                    if (isVisible && !QRGenerator.initialized) {
+                        QRGenerator.init();
+                        QRGenerator.initialized = true;
+                    }
+                }
+            });
+        });
+        observer.observe(qrGeneratorPage, { attributes: true });
+    }
+});

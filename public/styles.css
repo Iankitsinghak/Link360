@@ -2936,3 +2936,468 @@ textarea.form-input {
         justify-content: center;
     }
 }
+
+/* ================================
+   QR GENERATOR PAGE STYLES
+   ================================ */
+
+.qr-generator-container {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 24px;
+    padding: 0;
+}
+
+.qr-input-section,
+.qr-customization-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.qr-card {
+    background: rgba(11, 17, 32, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 157, 184, 0.15);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: all var(--transition-normal);
+}
+
+.qr-card:hover {
+    border-color: rgba(139, 157, 184, 0.25);
+    transform: translateY(-2px);
+}
+
+.qr-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.qr-card h3 i {
+    color: var(--primary);
+    font-size: 20px;
+}
+
+/* QR Preview */
+.qr-preview-card {
+    position: sticky;
+    top: 100px;
+}
+
+.qr-preview-container {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    padding: 40px;
+    position: relative;
+}
+
+.qr-canvas-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+#qrCanvas {
+    display: block;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.qr-brand-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    max-width: 140px;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+#qrPlaceholder {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 16px;
+}
+
+/* Quick Links */
+.quick-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.quick-link-btn {
+    padding: 12px 16px;
+    background: rgba(6, 182, 212, 0.1);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.quick-link-btn:hover {
+    background: rgba(6, 182, 212, 0.2);
+    border-color: var(--primary);
+    transform: translateX(4px);
+}
+
+.quick-link-btn .link-short {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.quick-link-btn .link-original {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Pattern Grid */
+.qr-pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 12px;
+}
+
+.pattern-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(139, 157, 184, 0.1);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.pattern-option:hover {
+    border-color: rgba(6, 182, 212, 0.5);
+    background: rgba(6, 182, 212, 0.05);
+}
+
+.pattern-option.active {
+    border-color: var(--primary);
+    background: rgba(6, 182, 212, 0.1);
+}
+
+.pattern-preview {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Pattern Previews - Visual representations */
+.pattern-square { background: repeating-linear-gradient(0deg, #333 0px, #333 8px, transparent 8px, transparent 16px), repeating-linear-gradient(90deg, #333 0px, #333 8px, transparent 8px, transparent 16px); }
+.pattern-dots { background-image: radial-gradient(circle, #333 30%, transparent 30%); background-size: 12px 12px; }
+.pattern-rounded { background: repeating-linear-gradient(0deg, #333 0px, #333 8px, transparent 8px, transparent 16px), repeating-linear-gradient(90deg, #333 0px, #333 8px, transparent 8px, transparent 16px); border-radius: 6px; }
+.pattern-extra-rounded { background: repeating-linear-gradient(0deg, #333 0px, #333 8px, transparent 8px, transparent 16px), repeating-linear-gradient(90deg, #333 0px, #333 8px, transparent 8px, transparent 16px); border-radius: 10px; }
+.pattern-classy { background: repeating-conic-gradient(#333 0deg 90deg, transparent 90deg 180deg); background-size: 16px 16px; }
+.pattern-classy-rounded { background: repeating-conic-gradient(#333 0deg 90deg, transparent 90deg 180deg); background-size: 16px 16px; border-radius: 8px; }
+.pattern-circular { background-image: radial-gradient(circle, #333 40%, transparent 40%); background-size: 14px 14px; }
+.pattern-diamond { background-image: repeating-linear-gradient(45deg, #333 0px, #333 6px, transparent 6px, transparent 12px), repeating-linear-gradient(-45deg, #333 0px, #333 6px, transparent 6px, transparent 12px); }
+.pattern-star { background: radial-gradient(ellipse at center, #333 20%, transparent 20%), radial-gradient(ellipse at center, transparent 40%, #333 40%, #333 45%, transparent 45%); background-size: 16px 16px; }
+.pattern-bars { background: repeating-linear-gradient(0deg, #333 0px, #333 6px, transparent 6px, transparent 12px); }
+.pattern-thick { background: repeating-linear-gradient(0deg, #333 0px, #333 12px, transparent 12px, transparent 20px), repeating-linear-gradient(90deg, #333 0px, #333 12px, transparent 12px, transparent 20px); }
+.pattern-thin { background: repeating-linear-gradient(0deg, #333 0px, #333 3px, transparent 3px, transparent 10px), repeating-linear-gradient(90deg, #333 0px, #333 3px, transparent 3px, transparent 10px); }
+.pattern-fluid { background: linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333), linear-gradient(-45deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333); background-size: 16px 16px; }
+.pattern-mosaic { background: conic-gradient(from 45deg, #333 0deg 90deg, transparent 90deg 180deg, #333 180deg 270deg, transparent 270deg 360deg); background-size: 16px 16px; }
+.pattern-leaf { background: radial-gradient(ellipse 40% 60% at 50% 40%, #333 50%, transparent 50%); background-size: 14px 14px; }
+
+.pattern-option span {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Frame Grid */
+.frame-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.frame-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(139, 157, 184, 0.1);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.frame-option:hover {
+    border-color: rgba(6, 182, 212, 0.5);
+    background: rgba(6, 182, 212, 0.05);
+}
+
+.frame-option.active {
+    border-color: var(--primary);
+    background: rgba(6, 182, 212, 0.1);
+}
+
+.frame-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    position: relative;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.frame-none { border: 2px solid transparent; }
+.frame-business { border: 4px solid #3B82F6; border-radius: 8px; }
+.frame-wedding { border: 4px solid #EC4899; border-radius: 50%; }
+.frame-birthday { border: 4px solid #F59E0B; border-radius: 12px; background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%); }
+.frame-party { border: 4px dashed #8B5CF6; border-radius: 8px; }
+.frame-concert { border: 4px solid #EF4444; border-radius: 4px; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+.frame-conference { border: 4px double #06b6d4; border-radius: 8px; }
+.frame-restaurant { border: 4px solid #10B981; border-radius: 16px; }
+.frame-retail { border: 4px solid #8B5CF6; border-radius: 8px; background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%); }
+.frame-social { border: 4px solid #3B82F6; border-radius: 50%; background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%); }
+
+.frame-option span {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Color Picker */
+.color-picker-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.color-slider {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.color-slider label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.color-input-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.color-input-group input[type="color"] {
+    width: 60px;
+    height: 45px;
+    border: 2px solid rgba(139, 157, 184, 0.2);
+    border-radius: var(--radius-md);
+    background: transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.color-input-group input[type="color"]:hover {
+    border-color: var(--primary);
+}
+
+.color-hex {
+    flex: 1;
+    text-transform: uppercase;
+}
+
+.color-presets {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.color-preset {
+    width: 45px;
+    height: 45px;
+    border: 2px solid rgba(139, 157, 184, 0.2);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.color-preset:hover {
+    transform: scale(1.1);
+    border-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Download Options */
+.download-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.download-format label,
+.download-background label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.format-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.format-btn {
+    flex: 1;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(139, 157, 184, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.format-btn:hover {
+    border-color: rgba(6, 182, 212, 0.5);
+    background: rgba(6, 182, 212, 0.05);
+}
+
+.format-btn.active {
+    border-color: var(--primary);
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--primary);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive QR Generator */
+@media (max-width: 1024px) {
+    .qr-generator-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .qr-preview-card {
+        position: relative;
+        top: 0;
+    }
+    
+    .qr-pattern-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+    
+    .frame-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .qr-card {
+        padding: 20px;
+    }
+    
+    .qr-preview-container {
+        padding: 20px;
+        min-height: 300px;
+    }
+    
+    #qrCanvas {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .qr-pattern-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 8px;
+    }
+    
+    .pattern-preview {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .frame-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 8px;
+    }
+    
+    .frame-preview {
+        width: 50px;
+        height: 50px;
+    }
+}

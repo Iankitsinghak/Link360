@@ -29,6 +29,10 @@
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
+            <a href="/qr-generator" class="nav-item" data-page="qr-generator">
+                <i class="fas fa-qrcode"></i>
+                <span>QR Generator</span>
+            </a>
             <a href="/analytics" class="nav-item" data-page="analytics">
                 <i class="fas fa-chart-line"></i>
                 <span>Analytics</span>
@@ -340,6 +344,238 @@
                         <div class="card-body">
                             <div class="analytics-list" id="referrersList">
                                 <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- QR Generator Page -->
+            <section class="page" id="qrGeneratorPage" style="display: none;">
+                <div class="page-header">
+                    <div class="header-content">
+                        <h2>QR Code Generator</h2>
+                        <p class="header-subtitle">Create custom branded QR codes in seconds</p>
+                    </div>
+                </div>
+
+                <div class="qr-generator-container">
+                    <!-- QR Input Section -->
+                    <div class="qr-input-section">
+                        <div class="qr-card">
+                            <h3><i class="fas fa-link"></i> Enter Your Link</h3>
+                            <div class="form-group">
+                                <label>Link or Text</label>
+                                <input type="text" class="form-input" id="qrLinkInput" placeholder="https://example.com or paste any text">
+                            </div>
+                            <button class="btn btn-primary" id="generateQRBtn">
+                                <i class="fas fa-bolt"></i> Generate QR Code
+                            </button>
+                        </div>
+
+                        <!-- Quick Select Links -->
+                        <div class="qr-card">
+                            <h3><i class="fas fa-zap"></i> Quick Generate from Your Links</h3>
+                            <div class="quick-links-grid" id="quickLinksGrid">
+                                <p class="text-muted">Your recent links will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Customization Section -->
+                    <div class="qr-customization-section">
+                        <!-- QR Preview -->
+                        <div class="qr-card qr-preview-card">
+                            <h3><i class="fas fa-eye"></i> Preview</h3>
+                            <div class="qr-preview-container" id="qrPreviewContainer">
+                                <div class="qr-canvas-wrapper">
+                                    <canvas id="qrCanvas" width="400" height="400"></canvas>
+                                    <div class="qr-brand-overlay" id="qrBrandOverlay" style="display: none;">
+                                        <span id="qrBrandText"></span>
+                                    </div>
+                                </div>
+                                <p class="text-muted" id="qrPlaceholder">Enter a link to generate QR code</p>
+                            </div>
+                        </div>
+
+                        <!-- Pattern Selection -->
+                        <div class="qr-card">
+                            <h3><i class="fas fa-shapes"></i> QR Pattern Style</h3>
+                            <div class="qr-pattern-grid">
+                                <div class="pattern-option active" data-pattern="square">
+                                    <div class="pattern-preview pattern-square"></div>
+                                    <span>Square</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="dots">
+                                    <div class="pattern-preview pattern-dots"></div>
+                                    <span>Dots</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="rounded">
+                                    <div class="pattern-preview pattern-rounded"></div>
+                                    <span>Rounded</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="extra-rounded">
+                                    <div class="pattern-preview pattern-extra-rounded"></div>
+                                    <span>Extra Rounded</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="classy">
+                                    <div class="pattern-preview pattern-classy"></div>
+                                    <span>Classy</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="classy-rounded">
+                                    <div class="pattern-preview pattern-classy-rounded"></div>
+                                    <span>Classy Round</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="circular">
+                                    <div class="pattern-preview pattern-circular"></div>
+                                    <span>Circular</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="diamond">
+                                    <div class="pattern-preview pattern-diamond"></div>
+                                    <span>Diamond</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="star">
+                                    <div class="pattern-preview pattern-star"></div>
+                                    <span>Star</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="bars">
+                                    <div class="pattern-preview pattern-bars"></div>
+                                    <span>Bars</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="thick">
+                                    <div class="pattern-preview pattern-thick"></div>
+                                    <span>Thick</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="thin">
+                                    <div class="pattern-preview pattern-thin"></div>
+                                    <span>Thin</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="fluid">
+                                    <div class="pattern-preview pattern-fluid"></div>
+                                    <span>Fluid</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="mosaic">
+                                    <div class="pattern-preview pattern-mosaic"></div>
+                                    <span>Mosaic</span>
+                                </div>
+                                <div class="pattern-option" data-pattern="leaf">
+                                    <div class="pattern-preview pattern-leaf"></div>
+                                    <span>Leaf</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Brand Name -->
+                        <div class="qr-card">
+                            <h3><i class="fas fa-tag"></i> Brand Name (Optional)</h3>
+                            <div class="form-group">
+                                <input type="text" class="form-input" id="qrBrandInput" placeholder="Enter your brand name" maxlength="20">
+                                <small class="form-hint">Appears in the center of QR code</small>
+                            </div>
+                        </div>
+
+                        <!-- Event Frames -->
+                        <div class="qr-card">
+                            <h3><i class="fas fa-frame"></i> Event Frames</h3>
+                            <div class="frame-grid">
+                                <div class="frame-option active" data-frame="none">
+                                    <div class="frame-preview frame-none"></div>
+                                    <span>No Frame</span>
+                                </div>
+                                <div class="frame-option" data-frame="business">
+                                    <div class="frame-preview frame-business"></div>
+                                    <span>Business</span>
+                                </div>
+                                <div class="frame-option" data-frame="wedding">
+                                    <div class="frame-preview frame-wedding"></div>
+                                    <span>Wedding</span>
+                                </div>
+                                <div class="frame-option" data-frame="birthday">
+                                    <div class="frame-preview frame-birthday"></div>
+                                    <span>Birthday</span>
+                                </div>
+                                <div class="frame-option" data-frame="party">
+                                    <div class="frame-preview frame-party"></div>
+                                    <span>Party</span>
+                                </div>
+                                <div class="frame-option" data-frame="concert">
+                                    <div class="frame-preview frame-concert"></div>
+                                    <span>Concert</span>
+                                </div>
+                                <div class="frame-option" data-frame="conference">
+                                    <div class="frame-preview frame-conference"></div>
+                                    <span>Conference</span>
+                                </div>
+                                <div class="frame-option" data-frame="restaurant">
+                                    <div class="frame-preview frame-restaurant"></div>
+                                    <span>Restaurant</span>
+                                </div>
+                                <div class="frame-option" data-frame="retail">
+                                    <div class="frame-preview frame-retail"></div>
+                                    <span>Retail</span>
+                                </div>
+                                <div class="frame-option" data-frame="social">
+                                    <div class="frame-preview frame-social"></div>
+                                    <span>Social Media</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Color Picker -->
+                        <div class="qr-card">
+                            <h3><i class="fas fa-palette"></i> QR Color</h3>
+                            <div class="color-picker-container">
+                                <div class="color-slider">
+                                    <label>Foreground Color</label>
+                                    <div class="color-input-group">
+                                        <input type="color" id="qrColorPicker" value="#000000">
+                                        <input type="text" class="form-input color-hex" id="qrColorHex" value="#000000">
+                                    </div>
+                                </div>
+                                <div class="color-presets">
+                                    <button class="color-preset" data-color="#000000" style="background: #000000;"></button>
+                                    <button class="color-preset" data-color="#06b6d4" style="background: #06b6d4;"></button>
+                                    <button class="color-preset" data-color="#3B82F6" style="background: #3B82F6;"></button>
+                                    <button class="color-preset" data-color="#8B5CF6" style="background: #8B5CF6;"></button>
+                                    <button class="color-preset" data-color="#EC4899" style="background: #EC4899;"></button>
+                                    <button class="color-preset" data-color="#EF4444" style="background: #EF4444;"></button>
+                                    <button class="color-preset" data-color="#F59E0B" style="background: #F59E0B;"></button>
+                                    <button class="color-preset" data-color="#10B981" style="background: #10B981;"></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Download Options -->
+                        <div class="qr-card">
+                            <h3><i class="fas fa-download"></i> Download Options</h3>
+                            <div class="download-options">
+                                <div class="download-format">
+                                    <label>Format</label>
+                                    <div class="format-buttons">
+                                        <button class="format-btn active" data-format="png">
+                                            <i class="fas fa-file-image"></i> PNG
+                                        </button>
+                                        <button class="format-btn" data-format="jpg">
+                                            <i class="fas fa-file-image"></i> JPG
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="download-background" id="downloadBgOptions" style="display: none;">
+                                    <label>Background Color (JPG only)</label>
+                                    <div class="color-input-group">
+                                        <input type="color" id="bgColorPicker" value="#ffffff">
+                                        <input type="text" class="form-input color-hex" id="bgColorHex" value="#ffffff">
+                                    </div>
+                                </div>
+                                <div class="download-transparent" id="transparentOption">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="transparentBg" checked>
+                                        <span>Transparent Background</span>
+                                    </label>
+                                </div>
+                                <button class="btn btn-success btn-block" id="downloadQRBtn" disabled>
+                                    <i class="fas fa-download"></i> Download QR Code
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -709,6 +945,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <!-- App Scripts -->
+    <script src="qr-generator.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -200,7 +200,8 @@ function navigateToPage(page, updateHistory = true) {
     const titles = {
         home: 'Home',
         analytics: 'Analytics',
-        profile: 'Profile'
+        profile: 'Profile',
+        'qr-generator': 'QR Generator'
     };
     pageTitle.textContent = titles[page] || page;
     document.title = `Link360 - ${titles[page] || page}`;
@@ -212,6 +213,12 @@ function navigateToPage(page, updateHistory = true) {
         loadAnalytics();
     } else if (page === 'profile') {
         loadProfile();
+    } else if (page === 'qr-generator') {
+        // QR Generator page - initialized by qr-generator.js
+        if (window.QRGenerator && !window.QRGenerator.initialized) {
+            window.QRGenerator.init();
+            window.QRGenerator.initialized = true;
+        }
     }
     
     // Close sidebar on mobile
