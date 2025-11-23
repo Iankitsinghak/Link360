@@ -130,6 +130,60 @@ body {
     line-height: 1.5;
 }
 
+html[data-theme="light"] body {
+    background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 50%, #f8f9fa 100%);
+}
+
+html[data-theme="light"] .sidebar {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme="light"] .topbar {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme="light"] .stat-card,
+html[data-theme="light"] .link-card,
+html[data-theme="light"] .chart-card,
+html[data-theme="light"] .analytics-card,
+html[data-theme="light"] .profile-card,
+html[data-theme="light"] .qr-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme="light"] .modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(30px);
+}
+
+html[data-theme="light"] .modal-overlay {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="light"] .nav-item {
+    color: var(--text-secondary);
+}
+
+html[data-theme="light"] .nav-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
+
+html[data-theme="light"] .nav-item.active {
+    background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+    color: white;
+}
+
+html[data-theme="light"] .app-orb {
+    display: none;
+}
+
 /* ================================
    SIDEBAR - MINIMAL DESIGN
    ================================ */
